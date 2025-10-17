@@ -1,0 +1,105 @@
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: plebeian-academy-frontend
+  labels:
+    app: plebeian-academy
+    component: frontend
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: plebeian-academy
+      component: frontend
+  template:
+    metadata:
+      labels:
+        app: plebeian-academy
+        component: frontend
+    spec:
+      containers:
+      - name: frontend
+        image: plebeian-academy-frontend:latest
+        ports:
+        - containerPort: 80
+        resources:
+          requests:
+            memory: "256Mi"
+            cpu: "250m"
+          limits:
+            memory: "512Mi"
+            cpu: "500m"
+        livenessProbe:
+          httpGet:
+            path: /
+            port: 80
+          initialDelaySeconds: 30
+          periodSeconds: 10
+        readinessProbe:
+          httpGet:
+            path: /
+            port: 80
+          initialDelaySeconds: 5
+          periodSeconds: 5
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: plebeian-academy-backend
+  labels:
+    app: plebeian-academy
+    component: backend
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: plebeian-academy
+      component: backend
+  template:
+    metadata:
+      labels:
+        app: plebeian-academy
+        component: backend
+    spec:
+      containers:
+      - name: backend
+        image: plebeian-academy-backend:latest
+        ports:
+        - containerPort: 8000
+        env:
+        - name: DATABASE_URL
+          valueFrom:
+            secretKeyRef:
+              name: plebeian-academy-secrets
+              key: database-url
+        - name: JWT_SECRET_KEY
+          valueFrom:
+            secretKeyRef:
+              name: plebeian-academy-secrets
+              key: jwt-secret
+        - name: BLOCKCHAIN_NETWORK_URL
+          valueFrom:
+            configMapKeyRef:
+              name: plebeian-academy-config
+              key: blockchain-url
+        resources:
+          requests:
+            memory: "512Mi"
+            cpu: "500m"
+          limits:
+            memory: "1Gi"
+            cpu: "1000m"
+        livenessProbe:
+          httpGet:
+            path: /api/health
+            port: 8000
+          initialDelaySeconds: 30
+          periodSeconds: 10
+        readinessProbe:
+          httpGet:
+            path: /api/health
+            port: 8000
+          initialDelaySeconds: 5
+          periodSeconds: 5
