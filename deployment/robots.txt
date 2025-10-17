@@ -1,0 +1,21 @@
+# International Plebeian Tribunal Academy - Robots.txt
+# Allow all search engines to index the site
+
+User-agent: *
+Allow: /
+
+# Sitemap location
+Sitemap: https://www.plebeiantribunalsa.co.za/sitemap.xml
+
+# Crawl-delay (be respectful)
+Crawl-delay: 1
+
+# Specific paths
+Allow: /historical/
+Allow: /css/
+Allow: /js/
+Allow: /images/
+Allow: /fonts/
+
+# Disallow nothing (fully public site)
+Disallow:
