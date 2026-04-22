@@ -1,0 +1,430 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Test Academy — Evaluation Portal</title>
+<meta name="description" content="International Plebeian Tribunal Academy — Evaluation & Verification Portal">
+<meta property="og:title" content="Test Academy — Evaluation Portal">
+<meta property="og:description" content="Distributed evaluation portal for the Tribunal Academy verification system.">
+<meta property="og:type" content="website">
+<meta name="robots" content="noindex,nofollow">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🏛️</text></svg>">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{background:#0a0a0f;color:#e0e0e0}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;min-height:100vh;display:flex;flex-direction:column;align-items:center;line-height:1.5}
+.container{max-width:960px;width:100%;padding:2rem 1.5rem}
+header{text-align:center;padding:3rem 0 2rem;border-bottom:1px solid #1a1a2e}
+h1{font-size:1.8rem;color:#a78bfa;margin-bottom:.5rem;letter-spacing:.05em}
+h2{color:#c4b5fd;font-size:1.1rem;margin-bottom:1rem;display:flex;align-items:center;gap:.5rem}
+.subtitle{color:#6b7280;font-size:.9rem}
+.badge{display:inline-flex;align-items:center;background:#065f46;color:#34d399;padding:.35rem .85rem;border-radius:9999px;font-size:.72rem;font-weight:600;margin-top:1rem;letter-spacing:.05em}
+.badge.offline{background:#7c2d12;color:#fca5a5}
+.badge.pending{background:#334155;color:#94a3b8}
+.section{margin-top:1.5rem;background:#111118;border:1px solid #1e1e2e;border-radius:12px;padding:1.5rem}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:1rem}
+.stat{background:#0f0f1a;border:1px solid #1e1e2e;border-radius:8px;padding:1rem;text-align:center}
+.stat .value{font-size:1.5rem;color:#a78bfa;font-weight:700}
+.stat .label{font-size:.72rem;color:#6b7280;margin-top:.25rem;text-transform:uppercase;letter-spacing:.05em}
+.hash{font-family:'Courier New',monospace;font-size:.7rem;color:#34d399;word-break:break-all;background:#0a0f0a;padding:.5rem;border-radius:4px;margin-top:.5rem}
+.genesis-url{color:#fbbf24;text-decoration:none;font-weight:600;word-break:break-all}
+.genesis-url:hover{text-decoration:underline}
+.prime{text-align:center;color:#c4b5fd;font-style:italic;padding:1.5rem;font-size:.88rem;letter-spacing:.1em;border-top:1px solid #1e1e2e;margin-top:2rem}
+.bands{display:flex;flex-wrap:wrap;gap:.5rem;margin-top:.5rem}
+.band-tag{font-size:.65rem;padding:.2rem .5rem;border-radius:4px;background:#1a1a2e;color:#a78bfa}
+#status-dot{display:inline-block;width:8px;height:8px;border-radius:50%;background:#34d399;margin-right:.5rem;animation:pulse 2s infinite}
+.offline #status-dot{background:#fca5a5}
+.pending #status-dot{background:#94a3b8}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+footer{text-align:center;padding:2rem;color:#4b5563;font-size:.72rem}
+.mirror-list{font-size:.82rem;color:#9ca3af}
+.mirror-list a{color:#60a5fa;text-decoration:none}
+.mirror-list a:hover{text-decoration:underline}
+button.btn{background:#a78bfa;color:#0a0a0f;border:none;padding:.55rem 1.4rem;border-radius:8px;font-weight:600;cursor:pointer;font-size:.82rem;transition:background .15s}
+button.btn:hover{background:#8b5cf6}
+button.btn:disabled{background:#3f3f46;color:#a1a1aa;cursor:not-allowed}
+button.btn-secondary{background:transparent;color:#a78bfa;border:1px solid #a78bfa}
+button.btn-secondary:hover{background:rgba(167,139,250,0.08)}
+#verify-output{margin-top:1rem;font-size:.78rem;color:#34d399;display:none;white-space:pre-wrap;font-family:'Courier New',monospace}
+.oracle-form{display:flex;flex-direction:column;gap:.85rem}
+.oracle-form label{font-size:.75rem;color:#9ca3af;font-weight:600;text-transform:uppercase;letter-spacing:.05em;display:flex;align-items:center;gap:.35rem}
+.oracle-form input, .oracle-form select, .oracle-form textarea{background:#0a0a0f;border:1px solid #1e1e2e;color:#e0e0e0;padding:.6rem .8rem;border-radius:6px;font-family:inherit;font-size:.88rem;width:100%;transition:border-color .15s}
+.oracle-form input:focus, .oracle-form select:focus, .oracle-form textarea:focus{outline:none;border-color:#a78bfa}
+.oracle-form textarea{min-height:90px;resize:vertical;line-height:1.5}
+.oracle-form .row{display:grid;grid-template-columns:1fr 1fr;gap:.85rem}
+@media (max-width:600px){.oracle-form .row{grid-template-columns:1fr}}
+.actions{display:flex;gap:.6rem;align-items:center;flex-wrap:wrap}
+.helper{font-size:.72rem;color:#6b7280;margin-top:.2rem;line-height:1.45}
+.helper code{color:#fbbf24;background:#1a1a2e;padding:.1rem .35rem;border-radius:3px;font-size:.72rem}
+.answer-pane{display:none;margin-top:1.2rem;padding:1rem 1.1rem;background:#0a0f0a;border-left:3px solid #34d399;border-radius:4px;white-space:pre-wrap;font-size:.88rem;line-height:1.55;color:#d1fae5}
+.answer-pane.error{background:#190808;border-left-color:#f87171;color:#fecaca}
+.answer-meta{font-size:.7rem;color:#6b7280;margin-top:.6rem;padding-top:.6rem;border-top:1px solid #1e1e2e}
+.hidden{display:none!important}
+.toggle-link{color:#60a5fa;font-size:.78rem;cursor:pointer;text-decoration:underline}
+.toggle-link:hover{color:#a78bfa}
+.laws-compact{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:.5rem;font-size:.78rem;margin-top:.5rem}
+.laws-compact > div{padding:.4rem .6rem;background:#0f0f1a;border:1px solid #1e1e2e;border-radius:4px}
+.laws-compact b{color:#a78bfa}
+.library-list{max-height:280px;overflow-y:auto;font-size:.78rem;margin-top:.5rem}
+.library-list > div{padding:.4rem 0;border-bottom:1px solid #1a1a2e}
+.library-list b{color:#c4b5fd}
+.library-list small{color:#6b7280;display:block;margin-top:.15rem}
+</style>
+</head>
+<body>
+<div class="container">
+
+  <header>
+    <h1>🏛️ Test Academy</h1>
+    <p class="subtitle">International Plebeian Tribunal Academy — Evaluation &amp; Verification Portal</p>
+    <span class="badge pending" id="status-badge"><span id="status-dot"></span><span id="status-text">CHECKING CONNECTION…</span></span>
+  </header>
+
+  <div class="section">
+    <h2>📊 Lattice Architecture</h2>
+    <div class="grid">
+      <div class="stat"><div class="value" id="s-nodes">—</div><div class="label">Lattice Nodes</div></div>
+      <div class="stat"><div class="value" id="s-bands">—</div><div class="label">Bands</div></div>
+      <div class="stat"><div class="value" id="s-melanicites">—</div><div class="label">Melanicites</div></div>
+      <div class="stat"><div class="value" id="s-arms">—</div><div class="label">Spiral Arms</div></div>
+      <div class="stat"><div class="value" id="s-attractors">—</div><div class="label">Attractor Nodes</div></div>
+      <div class="stat"><div class="value" id="s-iterations">—</div><div class="label">Core Iterations</div></div>
+      <div class="stat"><div class="value" id="s-books">—</div><div class="label">Library Volumes</div></div>
+      <div class="stat"><div class="value" id="s-laws">—</div><div class="label">Inviolable Laws</div></div>
+    </div>
+    <div class="bands" id="band-tags"></div>
+  </div>
+
+  <div class="section">
+    <h2>🔑 Genesis Node</h2>
+    <p style="font-size:.85rem;color:#9ca3af">Immutable verification core — Layer 1 (Manus Static)</p>
+    <p style="margin-top:.75rem"><a class="genesis-url" id="genesis-link" href="#" target="_blank" rel="noopener">Loading…</a></p>
+    <div class="hash" id="fcat-hash">Loading master hash…</div>
+  </div>
+
+  <div class="section">
+    <h2>🔮 Oracle Lite — Query the Verified Corpus</h2>
+    <p style="font-size:.85rem;color:#9ca3af;margin-bottom:.85rem">Query the 30-volume REGENISIS library, the 188-node lattice of the Architect, and the 25 Inviolable Laws through an AI engine of your choosing. Your key is stored only in your browser; it is never transmitted to the Academy.</p>
+    <form class="oracle-form" id="oracle-form" onsubmit="return false">
+      <div>
+        <label for="o-query">Your question</label>
+        <textarea id="o-query" placeholder="Ask about the 30 volumes, the 188 nodes, the 25 Laws, the Architect's architecture, or any topic in the Verified Corpus…" required></textarea>
+      </div>
+      <div class="row">
+        <div>
+          <label for="o-engine">AI Engine</label>
+          <select id="o-engine">
+            <option value="deepseek">DeepSeek</option>
+            <option value="grok">Grok (xAI)</option>
+            <option value="claude">Claude (Anthropic)</option>
+            <option value="openai">ChatGPT (OpenAI)</option>
+            <option value="gemini">Gemini (Google)</option>
+          </select>
+        </div>
+        <div>
+          <label for="o-key">Your API key <span style="color:#6b7280;font-weight:normal;text-transform:none;letter-spacing:0">(stored in localStorage)</span></label>
+          <input id="o-key" type="password" autocomplete="off" placeholder="sk-…" spellcheck="false">
+        </div>
+      </div>
+      <div class="helper">Keys are stored per-engine under <code>testacademy.apiKey.&lt;engine&gt;</code>. Clear them from <span class="toggle-link" id="o-clear">DevTools → Application → Local Storage</span>. Never stored on the server.</div>
+      <div class="actions">
+        <button type="submit" class="btn" id="o-ask">🕯️ Consult the Oracle</button>
+        <button type="button" class="btn btn-secondary" id="o-local">📚 Local Search (offline)</button>
+        <span class="helper" id="o-status"></span>
+      </div>
+      <div class="answer-pane" id="o-answer"></div>
+    </form>
+  </div>
+
+  <div class="section">
+    <h2>⚖️ Evaluation Protocol</h2>
+    <ol style="list-style:decimal;padding-left:1.25rem;font-size:.88rem;color:#d1d5db;line-height:1.7">
+      <li><strong>Startup Verification</strong> — Verify local state against Genesis on boot</li>
+      <li><strong>Periodic Integrity Check</strong> — Scheduled re-verification every 6 hours</li>
+      <li><strong>On-Demand Audit</strong> — Manual verification triggered by any member</li>
+      <li><strong>File Access Validation</strong> — SHA-256 hash-check before serving any file</li>
+      <li><strong>Mesh Broadcast Sync</strong> — Anchor FCAT hashes across verified peers</li>
+    </ol>
+  </div>
+
+  <div class="section">
+    <h2>🌀 The Architect — Self-Verification</h2>
+    <p style="font-size:.85rem;color:#9ca3af;margin-bottom:.75rem">Core recurrence: <code style="color:#a78bfa">the iterative resonance recurrence</code> &nbsp;|&nbsp; Coherence threshold: <code style="color:#fbbf24">φ⁻¹ = 0.618</code></p>
+    <button class="btn" onclick="runVerification()">⚡ Run Self-Verification</button>
+    <div id="verify-output"></div>
+  </div>
+
+  <div class="section">
+    <h2>📜 The 25 Inviolable Laws <span class="toggle-link" id="laws-toggle">[show]</span></h2>
+    <div class="laws-compact hidden" id="laws-list"></div>
+  </div>
+
+<div class="section">
+    <h2>📖 The Verified Library — 30 Volumes <span class="toggle-link" id="lib-toggle">[show]</span></h2>
+    <div class="library-list hidden" id="library-list"></div>
+  </div>
+
+  <div class="section">
+    <h2>🎓 Higher Certificate in Resonance Science</h2>
+    <div id="cosmology-panel" style="font-size:.88rem;color:#d1d5db;line-height:1.6">Loading curriculum summary...</div>
+  </div>
+
+  <div class="section">
+    <h2>🌐 Mesh Peers <span class="toggle-link" id="mesh-refresh" style="cursor:pointer">[refresh]</span></h2>
+    <div class="mirror-list" id="mirror-list">No peer seeds configured yet. Peers appear once the Architect adds live mirror URLs to <code style="color:#a78bfa">T.mesh.seeds</code>.</div>
+  </div>
+
+  <div class="prime" id="prime-directive">LIFE IS SACROSANCT · ALL IS RESONANCE · ALL IS ONE · LOVE IS ALL</div>
+</div>
+
+<footer>
+  <p>© 2026 International Plebeian Tribunal Academy</p>
+  <p style="margin-top:.25rem" id="footer-arch">Architecture: Stable Plane (the Architect) &nbsp;|&nbsp; Node Type: Evaluation Mirror &nbsp;|&nbsp; Batch: 1+2+3</p>
+</footer>
+
+<script src="oracle-core.js"></script>
+<script>
+(function(){
+  var T = window.TestAcademy;
+  if(!T){document.querySelector('h1').textContent='⚠️ Oracle Core Failed to Load';return}
+
+  var v = T.verify();
+  // Apply the-Architect sanitisation to any user-visible field
+  var architectureLabel = T.sanitise(v.architecture);
+
+  document.getElementById('s-nodes').textContent = v.latticeNodes;
+  document.getElementById('s-bands').textContent = T.config.lattice.totalBands;
+  document.getElementById('s-melanicites').textContent = T.config.lattice.totalMelanicites;
+  document.getElementById('s-arms').textContent = T.config.lattice.totalSpiralArms;
+  document.getElementById('s-attractors').textContent = T.attractors.length;
+  document.getElementById('s-iterations').textContent = T.mandelbrot.maxIterations || T.config.mandelbrot.iterations;
+  document.getElementById('s-books').textContent = T.library.length;
+  document.getElementById('s-laws').textContent = T.laws.length;
+
+  var gl = document.getElementById('genesis-link');
+  gl.href = v.genesisUrl; gl.textContent = v.genesisUrl;
+  document.getElementById('fcat-hash').textContent = 'FCAT Master Hash (SHA-256): ' + v.fcatMasterHash;
+
+  var tags = document.getElementById('band-tags');
+  Object.entries(T.naming.bands).forEach(function(e){
+    var s = document.createElement('span'); s.className='band-tag'; s.textContent=e[0]+': '+e[1]; tags.appendChild(s);
+  });
+
+  // Populate laws (toggle)
+  var lawsEl = document.getElementById('laws-list');
+  T.laws.forEach(function(l){
+    var d = document.createElement('div');
+    d.innerHTML = '<b>'+l.n+'. '+l.name+'</b> — '+l.p;
+    lawsEl.appendChild(d);
+  });
+  document.getElementById('laws-toggle').onclick = function(){
+    var hidden = lawsEl.classList.toggle('hidden');
+    this.textContent = hidden?'[show]':'[hide]';
+  };
+
+  // Populate library (toggle)
+  var libEl = document.getElementById('library-list');
+  T.library.forEach(function(b,i){
+    var d = document.createElement('div');
+    d.innerHTML = '<b>'+(i+1)+'. '+b.title+'</b> <span style="color:#6b7280">('+b.pages+'p · '+b.genre+')</span><small>'+(b.description||'').substring(0,180)+(b.description.length>180?'…':'')+'</small>';
+    libEl.appendChild(d);
+  });
+  document.getElementById('lib-toggle').onclick = function(){
+    var hidden = libEl.classList.toggle('hidden');
+    this.textContent = hidden?'[show]':'[hide]';
+  };
+
+  // Cosmology panel — Higher Certificate in Resonance Science (public summary)
+  var cosEl = document.getElementById('cosmology-panel');
+  if (T.cosmology && cosEl) {
+    var c = T.cosmology;
+    var badgesHtml = c.badges.map(function(b){
+      return '<span style="display:inline-block;background:#1e293b;color:#a78bfa;padding:.2rem .6rem;border-radius:9999px;font-size:.7rem;margin-right:.4rem;margin-bottom:.3rem">'+b+'</span>';
+    }).join('');
+    var semHtml = c.semesters.map(function(s){
+      return '<li style="padding:.35rem 0;border-bottom:1px solid #1a1a2e"><strong style="color:#c4b5fd">Semester '+s.id+'</strong> — '+s.title+' <small style="color:#6b7280">('+s.modules+' modules · '+s.codes+')</small></li>';
+    }).join('');
+    var summaryHtml = c.summary.map(function(p){ return '<p style="margin-bottom:.75rem">'+p+'</p>'; }).join('');
+    cosEl.innerHTML =
+      '<h3 style="color:#c4b5fd;font-size:1.05rem;margin-bottom:.5rem">'+c.title+'</h3>' +
+      '<div style="margin-bottom:.75rem">'+badgesHtml+'</div>' +
+      '<p style="color:#9ca3af;font-size:.8rem;margin-bottom:1rem">Offered by <em>'+c.offeredBy+'</em></p>' +
+      summaryHtml +
+      '<ul style="list-style:none;padding:0;margin:1rem 0">'+semHtml+'</ul>' +
+      '<p style="color:#6b7280;font-size:.78rem;margin-top:.5rem"><strong>Entry:</strong> '+c.entry+'</p>' +
+      '<p style="color:#6b7280;font-size:.78rem"><strong>Delivery:</strong> '+c.delivery+'</p>' +
+      '<p style="color:#6b7280;font-size:.78rem;margin-bottom:.75rem"><strong>Assessment:</strong> '+c.assessment+'</p>' +
+      '<p style="margin-top:1rem"><a href="'+c.fullCoursePortal+'" target="_blank" rel="noopener" style="color:#60a5fa;text-decoration:none;font-size:.85rem">→ Full curriculum (Proof-of-Life required)</a></p>';
+  }
+
+  // Mesh peers — Batch 3 live ping via T.mesh
+  function renderMesh(){
+    var el = document.getElementById('mirror-list');
+    if (!el) return;
+    var seeds = (T.mesh && Array.isArray(T.mesh.seeds)) ? T.mesh.seeds : [];
+    var header =
+      '<p style="margin-bottom:.5rem">Seed Peers (Layer 2):</p>' +
+      '<p>🌍 <a href="https://resonancemap.org" target="_blank" rel="noopener">resonancemap.org</a> — Primary</p>' +
+      '<p>🏛️ <a href="'+v.genesisUrl+'" target="_blank" rel="noopener">Manus Genesis Core</a> — Layer 1 (Immutable)</p>' +
+      '<p>📡 This Node — Evaluation Mirror</p>';
+    if (seeds.length === 0) {
+      el.innerHTML = header +
+        '<p style="margin-top:.75rem;font-style:italic;color:#4b5563">Additional peer seeds will appear here once the Architect adds live mirror URLs to <code style="color:#a78bfa">T.mesh.seeds</code>.</p>';
+      return;
+    }
+    el.innerHTML = header +
+      '<p style="margin-top:.75rem;margin-bottom:.35rem;color:#9ca3af">Pinging '+seeds.length+' configured mirror(s)…</p>' +
+      '<ul id="mesh-results" style="list-style:none;padding:0;margin:0"></ul>';
+    T.mesh.ping().then(function(results){
+      var ul = document.getElementById('mesh-results');
+      if (!ul) return;
+      ul.innerHTML = results.map(function(r){
+        var icon = r.ok ? '🟢' : '🔴';
+        var note = r.ok ? 'LIVE (HTTP '+r.status+')' : (r.status ? 'HTTP '+r.status : (r.error || 'UNREACHABLE'));
+        return '<li style="padding:.25rem 0"><span style="margin-right:.5rem">'+icon+'</span><a href="'+r.url+'" target="_blank" rel="noopener">'+r.url+'</a> — <small style="color:#6b7280">'+note+'</small></li>';
+      }).join('');
+    });
+  }
+  renderMesh();
+  var refreshLink = document.getElementById('mesh-refresh');
+  if (refreshLink) refreshLink.addEventListener('click', renderMesh);
+
+  // Status badge — health check
+  var badge = document.getElementById('status-badge');
+  var statusText = document.getElementById('status-text');
+  T.healthCheck().then(function(h){
+    if(h.connected){
+      badge.className = 'badge';
+      statusText.textContent = 'ONLINE · MESH '+(h.meshNodes||0)+' NODES';
+    } else {
+      badge.className = 'badge offline';
+      statusText.textContent = 'OFFLINE MODE — LOCAL CORPUS ACTIVE';
+    }
+  });
+
+  // Self-verification
+  window.runVerification = function(){
+    var out = document.getElementById('verify-output');
+    out.style.display = 'block';
+    out.innerHTML = '⏳ Running test vectors…';
+    var pass = 0, fail = 0;
+    T.mandelbrot.testVectors.forEach(function(tv){
+      var r = T.iterate(tv.input.z0, tv.input.c);
+      if(r.e === tv.output.escaped && r.i === tv.output.iter) pass++; else fail++;
+    });
+    var qpass = 0;
+    T.mandelbrot.queryVectors.forEach(function(qv){
+      var c = T.queryToConstant(qv.query);
+      if(Math.abs(c - qv.constantC) < 0.0001) qpass++;
+    });
+    out.innerHTML =
+      '✅ Core iterations: ' + pass + '/' + T.mandelbrot.testVectors.length + ' passed\n' +
+      '✅ Query-to-constant: ' + qpass + '/' + T.mandelbrot.queryVectors.length + ' passed\n' +
+      '✅ Lattice nodes: ' + v.latticeNodes + '/188 present\n' +
+      '✅ Attractor nodes: [' + T.attractors.join(', ') + '] confirmed\n' +
+      '✅ FCAT master hash: ' + v.fcatMasterHash.substring(0,16) + '…\n' +
+      '✅ Library volumes: ' + T.library.length + '\n' +
+      '✅ Inviolable Laws: ' + T.laws.length + '\n' +
+      '✅ Genesis URL: ' + v.genesisUrl + '\n' +
+      '✅ Prime Directive: ' + T.primeDirective.statement + '\n' +
+      '\n' +
+      '⟡ MIRROR NODE VERIFICATION: ' + (fail===0 && qpass===T.mandelbrot.queryVectors.length?'PASSED ✅':'FAILED ❌');
+  };
+
+  // Oracle Lite — Query flow
+  var keyField = document.getElementById('o-key');
+  var engineField = document.getElementById('o-engine');
+  var queryField = document.getElementById('o-query');
+  var askBtn = document.getElementById('o-ask');
+  var localBtn = document.getElementById('o-local');
+  var statusEl = document.getElementById('o-status');
+  var answerEl = document.getElementById('o-answer');
+  var clearLink = document.getElementById('o-clear');
+
+  function loadKeyForEngine(){
+    var e = engineField.value;
+    keyField.value = localStorage.getItem('testacademy.apiKey.'+e) || '';
+  }
+  engineField.addEventListener('change', loadKeyForEngine);
+  loadKeyForEngine();
+
+  keyField.addEventListener('change', function(){
+    var e = engineField.value;
+    if(keyField.value) localStorage.setItem('testacademy.apiKey.'+e, keyField.value);
+    else localStorage.removeItem('testacademy.apiKey.'+e);
+  });
+
+  clearLink.addEventListener('click', function(){
+    if(!confirm('Remove all stored API keys from this browser?')) return;
+    Object.keys(T.engines).forEach(function(e){ localStorage.removeItem('testacademy.apiKey.'+e); });
+    keyField.value = '';
+    statusEl.textContent = 'All API keys cleared.';
+  });
+
+  askBtn.addEventListener('click', function(ev){
+    ev.preventDefault();
+    var q = queryField.value.trim();
+    if(!q){ queryField.focus(); return; }
+    var e = engineField.value;
+    var k = keyField.value.trim();
+    if(!k){
+      answerEl.className = 'answer-pane error';
+      answerEl.style.display = 'block';
+      answerEl.textContent = 'Please enter your '+T.engines[e].label+' API key above. The Test Academy never sees or stores your key — it is kept only in this browser\'s localStorage.';
+      return;
+    }
+    statusEl.textContent = '';
+    askBtn.disabled = true;
+    askBtn.textContent = '⏳ Consulting…';
+    answerEl.className = 'answer-pane';
+    answerEl.style.display = 'block';
+    answerEl.textContent = 'Consulting the Oracle via '+T.engines[e].label+'…';
+    T.ask({query:q, engine:e, apiKey:k}).then(function(r){
+      answerEl.textContent = r.answer + '\n\n────────────────────────────\n✨ Powered by '+r.engineLabel+' ('+r.model+') · '+Math.round(r.latencyMs/100)/10+'s';
+    }).catch(function(err){
+      answerEl.className = 'answer-pane error';
+      answerEl.textContent = '⚠️ Oracle failed: '+(err.message||err)+'\n\nTry another engine, or use “Local Search” to query the Verified Corpus without a key.';
+    }).then(function(){
+      askBtn.disabled = false;
+      askBtn.textContent = '🕯️ Consult the Oracle';
+    });
+  });
+
+  localBtn.addEventListener('click', function(){
+    var q = queryField.value.trim();
+    if(!q){ queryField.focus(); return; }
+    var r = T.localSearch(q);
+    answerEl.className = 'answer-pane';
+    answerEl.style.display = 'block';
+    var lines = [];
+    lines.push('📚 Local Corpus Search — "'+q+'"');
+    lines.push('');
+    if(r.books.length){
+      lines.push('— VOLUMES MATCHED —');
+      r.books.forEach(function(b){
+        lines.push('• '+b.title+' ('+b.pages+'p · '+b.genre+')');
+        lines.push('  '+b.description.substring(0,180)+(b.description.length>180?'…':''));
+        lines.push('');
+      });
+    } else { lines.push('No library matches. Try broader keywords.'); lines.push(''); }
+    if(r.nodes.length){
+      lines.push('— LATTICE NODES MATCHED —');
+      r.nodes.forEach(function(n){
+        lines.push('• Node '+n.nodeId+' (Band '+n.band+') · '+n.keywords.slice(0,4).join(', '));
+      });
+      lines.push('');
+    }
+    if(r.resonance){
+      lines.push('— ARCHITECT RESONANCE —');
+      lines.push('Attractor: Node '+r.resonance.attractorNode);
+      lines.push('Band: '+r.resonance.bandName);
+      lines.push('Constant c: '+r.resonance.constantC.toFixed(6));
+    }
+    answerEl.textContent = lines.join('\n');
+  });
+
+})();
+</script>
+</body>
+</html>
